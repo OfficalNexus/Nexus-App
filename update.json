@@ -1,6 +1,6 @@
 {
-  "version": "1.4.0",
-  "notes": "Nexus 1.4.0 — Windows installer release with shortcuts, uninstaller, and silent installer updates.",
-  "url": "https://github.com/OfficalNexus/Nexus-App/releases/download/v1.4.0/Nexus-Setup-1.4.0.exe",
-  "size": 91427081
+  "version": "1.4.1",
+  "notes": "Nexus 1.4.1 — installer update test with no feature changes.",
+  "url": "https://github.com/OfficalNexus/Nexus-App/releases/download/v1.4.1/Nexus-Setup-1.4.1.exe",
+  "size": 91427051
 }
