@@ -1,6 +1,6 @@
 {
-  "version": "1.4.1",
-  "notes": "Nexus 1.4.1 — installer update test with no feature changes.",
-  "url": "https://github.com/OfficalNexus/Nexus-App/releases/download/v1.4.1/Nexus-Setup-1.4.1.exe",
+  "version": "1.4.2",
+  "notes": "Nexus 1.4.2 — update checks now bypass stale GitHub manifest cache.",
+  "url": "https://github.com/OfficalNexus/Nexus-App/releases/download/v1.4.2/Nexus-Setup-1.4.2.exe",
   "size": 91427051
 }
