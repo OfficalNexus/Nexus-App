@@ -1,6 +1,6 @@
 {
-  "version": "1.4.6",
-  "notes": "Nexus 1.4.6 — fixed GitHub API headers for update checks.",
-  "url": "https://github.com/OfficalNexus/Nexus-App/releases/download/v1.4.6/Nexus-Setup-1.4.6.exe",
+  "version": "1.4.7",
+  "notes": "Nexus 1.4.7 — update test with no feature changes.",
+  "url": "https://github.com/OfficalNexus/Nexus-App/releases/download/v1.4.7/Nexus-Setup-1.4.7.exe",
   "size": 91427051
 }
