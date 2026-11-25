@@ -1,6 +1,6 @@
 {
-  "version": "1.4.7",
-  "notes": "Nexus 1.4.7 — update test with no feature changes.",
-  "url": "https://github.com/OfficalNexus/Nexus-App/releases/download/v1.4.7/Nexus-Setup-1.4.7.exe",
+  "version": "1.4.8",
+  "notes": "Nexus 1.4.8 — waits for a clean app exit before reinstalling and reopening.",
+  "url": "https://github.com/OfficalNexus/Nexus-App/releases/download/v1.4.8/Nexus-Setup-1.4.8.exe",
   "size": 91427051
 }
