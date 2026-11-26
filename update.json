@@ -1,6 +1,6 @@
 {
   "version": "1.4.9",
-  "notes": "Nexus 1.4.9 — update test with no feature changes.",
+  "notes": "Nexus 1.4.9 — read-only Windows device scanner and safe polling-rate target controls.",
   "url": "https://github.com/OfficalNexus/Nexus-App/releases/download/v1.4.9/Nexus-Setup-1.4.9.exe",
-  "size": 91427051
+  "size": 91424745
 }
