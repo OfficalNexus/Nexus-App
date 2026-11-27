@@ -7,6 +7,7 @@
   const storageKey = 'nexus-tools-v11';
   const lastSeenVersionKey = 'nexus-last-seen-version';
   const builtInChangelog = {
+    '1.8.1': ['Added a smooth full-turn animation when the refresh icon is clicked.', 'The refresh motion gives clear feedback while Nexus checks for updates.', 'The green update icon and silent installation behavior remain unchanged.'],
     '1.8.0': ['Added a soft live-light background with drifting aurora motion.', 'Improved Home and Settings navigation with a sliding page transition and animated active indicator.', 'Added staggered content entrance motion while respecting the animations setting.'],
     '1.7.2': ['Polished bold typography across navigation, metrics, and window labels.', 'Fixed the Home screen version fallback so it shows the current app version immediately.', 'Kept spacing, colors, animations, and the Discord-style updater unchanged.'],
     '1.7.1': ['Refined Nexus typography with bold, clearer text throughout the interface.', 'Added stronger heading hierarchy and a polished Windows-native font stack.', 'Kept the existing colors, layout, animations, and updater behavior unchanged.'],
@@ -598,6 +599,13 @@
           renderUpdateDialog();
         }
       } else if (updateState.status !== 'downloading') {
+        const refreshIcon = button.querySelector('.update-refresh-icon');
+        if (refreshIcon) {
+          refreshIcon.classList.remove('is-refreshing');
+          void refreshIcon.offsetWidth;
+          refreshIcon.classList.add('is-refreshing');
+          window.setTimeout(() => refreshIcon.classList.remove('is-refreshing'), 700);
+        }
         updateState = { status: 'checking' };
         renderUpdateDialog();
         const result = await window.aurora?.checkForUpdate?.();

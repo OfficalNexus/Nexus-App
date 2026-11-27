@@ -72,3 +72,7 @@ button,input,select,textarea{font-weight:650}
 @keyframes content-rise{from{opacity:0;transform:translate3d(0,9px,0)}to{opacity:1;transform:none}}
 body.dark .ambient-scene:after{background:linear-gradient(112deg,transparent 25%,color-mix(in srgb,#fff 22%,transparent) 48%,transparent 60%);opacity:.11}
 body.no-motion .ambient-scene,body.no-motion .ambient-scene:before,body.no-motion .ambient-scene:after{animation:none!important}
+
+/* Refresh click feedback */
+.update-refresh-icon.is-refreshing{animation:refresh-full-turn .62s cubic-bezier(.2,.78,.24,1)}
+@keyframes refresh-full-turn{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
