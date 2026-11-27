@@ -7,6 +7,7 @@
   const storageKey = 'nexus-tools-v11';
   const lastSeenVersionKey = 'nexus-last-seen-version';
   const builtInChangelog = {
+    '1.6.5': ['Updated the toolbar updater to show Check for updates when no update is available.', 'Added a download/install icon and Install update label when a downloaded update is ready.', 'Kept the detailed progress and install dialog available when the updater is opened.'],
     '1.6.4': ['Removed the Current focus section from Home.', 'Moved What’s new lower onto the Home page in a dedicated release-notes card.', 'Kept the full changelog available from the new Home-page card.'],
     '1.6.3': ['Added an NVIDIA-style update panel with live percentage, downloaded size, speed, and remaining time.', 'Added verified-ready, preparing-installation, and retry states.', 'Kept the existing silent per-user installer and GitHub updater backend unchanged.'],
     '1.6.2': ['Simplified the sidebar to Home and Settings only.', 'Temporarily removed the old device testing, tuning, history, profiles, and game tabs from the visible interface.', 'Updated Home to focus on the new FPS Game Profile Manager direction.'],
@@ -68,14 +69,19 @@
     const toolbarButton = $('#update-button');
     if (toolbarButton) {
       toolbarButton.classList.toggle('has-update', s.status === 'ready');
-      const label = toolbarButton.querySelector('span:last-child');
-      if (label) label.textContent = s.status === 'ready' ? 'Update ready' : s.status === 'downloading' ? `${s.percent || 0}% downloading` : 'Check for updates';
+      const label = toolbarButton.querySelector('.update-action-label');
+      const dot = toolbarButton.querySelector('.update-dot');
+      const actionIcon = toolbarButton.querySelector('.update-action-icon');
+      const ready = s.status === 'ready';
+      if (label) label.textContent = ready ? 'Install update' : s.status === 'downloading' ? `${s.percent || 0}% downloading` : 'Check for updates';
+      if (dot) dot.hidden = ready;
+      if (actionIcon) actionIcon.hidden = !ready;
     }
   }
   window.aurora?.onUpdateState?.(state => { updateState = state; renderUpdateDialog(); });
   window.aurora?.getUpdateState?.().then(state => { if (state) { updateState = state; renderUpdateDialog(); } }).catch(() => {});
   const pageTitles = { home: 'Home', settings: 'Settings' };
-  let appVersion = '1.6.4';
+  let appVersion = '1.6.5';
   let updateState = { status: 'idle' };
   function changelogEntries(version = appVersion, notes = '') {
     const external = String(notes || '').split(/\n+/).map(item => item.replace(/^[-*•]\s*/, '').trim()).filter(Boolean);
