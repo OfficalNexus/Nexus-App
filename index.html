@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'">
+  <title>Nexus — Peripheral tools</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="ambient-scene" aria-hidden="true"><i></i><i></i><i></i><span></span></div>
+  <div class="window-chrome">
+    <div class="window-drag-area" id="window-drag-area"><span class="window-app-mark">n</span><span class="window-title">Nexus <span>· Peripheral tools</span></span></div>
+    <div class="window-controls" aria-label="Window controls">
+      <button id="window-minimize" class="window-control" aria-label="Minimize"><span class="minimize-glyph"></span></button>
+      <button id="window-maximize" class="window-control" aria-label="Maximize"><span class="maximize-glyph"></span></button>
+      <button id="window-close" class="window-control close" aria-label="Close"><span class="close-glyph"></span></button>
+    </div>
+  </div>
+  <div class="app">
+    <aside class="sidebar" aria-label="Main navigation">
+      <div class="brand"><span class="brand-icon">n</span><div><strong>Nexus</strong><small>Peripheral tools</small></div></div>
+      <nav id="navigation">
+        <button data-page="home" class="nav-button active" aria-current="page"><span class="nav-icon" data-icon="home"></span>Home</button>
+        <div class="nav-group">TEST YOUR DEVICES</div>
+        <button data-page="mouse" class="nav-button"><span class="nav-icon" data-icon="mouse"></span>Mouse</button>
+        <button data-page="keyboard" class="nav-button"><span class="nav-icon" data-icon="keyboard"></span>Keyboard</button>
+        <button data-page="controller" class="nav-button"><span class="nav-icon" data-icon="controller"></span>Controller</button>
+        <div class="nav-group">YOUR WORKSPACE</div>
+        <button data-page="devices" class="nav-button"><span class="nav-icon" data-icon="controller"></span>Devices</button>
+        <button data-page="tuning" class="nav-button"><span class="nav-icon" data-icon="settings"></span>Tuning</button>
+        <button data-page="history" class="nav-button"><span class="nav-icon" data-icon="history"></span>Test history</button>
+        <button data-page="profiles" class="nav-button"><span class="nav-icon" data-icon="profiles"></span>Profiles</button>
+        <button data-page="settings" class="nav-button"><span class="nav-icon" data-icon="settings"></span>Settings</button>
+      </nav>
+      <div class="sidebar-note"><span class="nav-icon" data-icon="shield"></span><strong>No hardware changes</strong><p>Your device firmware and drivers stay untouched.</p></div>
+      <div class="sidebar-version">Nexus 1.4.9 <span>·</span> Windows</div>
+    </aside>
+    <div class="workspace">
+      <div class="toolbar"><span id="breadcrumb">Home</span><div class="toolbar-right"><button id="update-button" class="update-button"><span class="update-dot"></span><span>Check for updates</span></button><span class="badge neutral">Local & private</span><button id="quick-settings" class="icon-button" aria-label="Open settings"><span class="nav-icon" data-icon="settings"></span></button></div></div>
+      <main id="page" tabindex="-1"></main>
+    </div>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"><span class="nav-icon" data-icon="check"></span><span id="toast-message"></span></div>
+  <dialog id="update-dialog"><div class="update-dialog-icon"><span class="nav-icon" data-icon="download"></span></div><h2 id="update-title">Check for updates</h2><p id="update-message">Nexus will check the official update feed.</p><div class="update-progress" id="update-progress" hidden><div></div></div><div class="update-version"><span>Installed version</span><strong id="update-version">1.5.0</strong></div><div class="dialog-actions"><button value="cancel" class="button secondary" id="update-later">Not now</button><button value="confirm" class="button" id="restart-app" hidden>Install and restart</button></div></dialog>
+  <dialog id="confirmation"><form method="dialog"><h2 id="confirm-title">Clear data?</h2><p id="confirm-description"></p><div class="dialog-actions"><button value="cancel" class="button secondary">Cancel</button><button value="confirm" class="button danger">Clear</button></div></form></dialog>
+  <script src="ui.js"></script>
+  <script src="renderer.js"></script>
+</body>
+</html>

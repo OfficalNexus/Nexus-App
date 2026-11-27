@@ -1,0 +1,66 @@
+{
+  "name": "nexus-boost",
+  "version": "1.5.0",
+  "description": "Nexus local peripheral testing tools",
+  "author": "Nexus",
+  "repository": "https://github.com/OfficalNexus/Nexus-App",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "package:installer": "electron-builder --win nsis --x64 --publish never",
+    "release": "electron-builder --win nsis --x64 --publish always"
+  },
+  "devDependencies": {
+    "electron": "35.7.5",
+    "electron-builder": "26.18.0"
+  },
+  "build": {
+    "appId": "com.nexusboost.app",
+    "productName": "Nexus",
+    "asar": true,
+    "files": [
+      "main.js",
+      "preload.js",
+      "index.html",
+      "styles.css",
+      "ui.js",
+      "renderer.js",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "artifactName": "Nexus-Setup-${version}.exe",
+      "oneClick": true,
+      "perMachine": false,
+      "allowElevation": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Nexus",
+      "runAfterFinish": true,
+      "deleteAppDataOnUninstall": false
+    },
+    "directories": {
+      "output": "release-v140-installer"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "OfficalNexus",
+        "repo": "Nexus-App",
+        "releaseType": "release"
+      }
+    ]
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.11"
+  }
+}
