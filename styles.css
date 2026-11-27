@@ -35,3 +35,7 @@ html,body{height:100%;overflow:hidden}
 
 /* Updater states are mutually exclusive: never show refresh and install icons together. */
 .update-refresh-icon[hidden],.update-download-image[hidden]{display:none!important}
+
+/* Nexus is an app interface, not a document: prevent accidental text selection/copying. */
+html,body,.app,.workspace,.sidebar,.toolbar,main,dialog,button,label,p,h1,h2,h3,span,small,strong,b{user-select:none;-webkit-user-select:none}
+input,select,textarea{user-select:none;-webkit-user-select:none}
