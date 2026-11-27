@@ -1,6 +1,6 @@
 {
   "name": "nexus-boost",
-  "version": "1.5.4",
+  "version": "1.5.5",
   "description": "Nexus local peripheral testing tools",
   "author": "Nexus",
   "repository": "https://github.com/OfficalNexus/Nexus-App",
@@ -28,6 +28,7 @@
       "package.json"
     ],
     "win": {
+      "icon": "assets/nexus-controller.ico",
       "target": [
         {
           "target": "nsis",

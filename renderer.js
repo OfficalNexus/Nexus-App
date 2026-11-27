@@ -7,6 +7,7 @@
   const storageKey = 'nexus-tools-v11';
   const lastSeenVersionKey = 'nexus-last-seen-version';
   const builtInChangelog = {
+    '1.5.5': ['Changed the Windows desktop and Start Menu icon to the new controller artwork.', 'The supplied controller logo is now used by the installer and application shortcuts.'],
     '1.5.3': ['Added a What’s new window after updates.', 'Added a toolbar shortcut so release notes can be opened anytime.', 'Improved update messaging with a clear version and change summary.'],
     '1.5.2': ['Introduced the new geometric Nexus logo in the sidebar and title bar.', 'Added a modern gradient emblem with light and dark theme support.'],
     '1.5.1': ['Improved the Windows installer update flow.', 'Fixed update packaging so the installer and update metadata are delivered together.'],
@@ -60,7 +61,7 @@
   window.aurora?.onUpdateState?.(state => { updateState = state; renderUpdateDialog(); });
   window.aurora?.getUpdateState?.().then(state => { if (state) { updateState = state; renderUpdateDialog(); } }).catch(() => {});
   const pageTitles = { home: 'Home', mouse: 'Mouse', keyboard: 'Keyboard', controller: 'Controller', devices: 'Devices', tuning: 'Tuning', history: 'Test history', profiles: 'Profiles', settings: 'Settings' };
-  let appVersion = '1.5.4';
+  let appVersion = '1.5.5';
   let updateState = { status: 'idle' };
   function changelogEntries(version = appVersion, notes = '') {
     const external = String(notes || '').split(/\n+/).map(item => item.replace(/^[-*•]\s*/, '').trim()).filter(Boolean);
