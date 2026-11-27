@@ -7,6 +7,7 @@
   const storageKey = 'nexus-tools-v11';
   const lastSeenVersionKey = 'nexus-last-seen-version';
   const builtInChangelog = {
+    '1.6.8': ['Made the toolbar update check silent, without opening the old update dialog.', 'Clicking the green update icon now immediately closes Nexus and installs the downloaded update.', 'The refresh icon changes to the install icon only after an update is ready.'],
     '1.6.7': ['Fixed the updater toolbar so the refresh and green install icons are mutually exclusive.', 'The refresh icon is shown only when no update is ready.', 'The green download/install icon is shown only after an update has finished downloading.'],
     '1.6.6': ['Changed the toolbar updater to an icon-only control.', 'The refresh icon checks for updates when no update is available.', 'The supplied green download icon appears when an update is ready to install.'],
     '1.6.5': ['Updated the toolbar updater to show Check for updates when no update is available.', 'Added a download/install icon and Install update label when a downloaded update is ready.', 'Kept the detailed progress and install dialog available when the updater is opened.'],
@@ -583,9 +584,16 @@
     }
     if (button.id === 'window-close') { window.aurora?.window?.close(); return; }
     if (button.id === 'update-button') {
-      $('#update-dialog').showModal();
-      renderUpdateDialog();
-      if (updateState.status !== 'downloading' && updateState.status !== 'ready') {
+      if (updateState.status === 'ready') {
+        updateState = { ...updateState, status: 'installing' };
+        renderUpdateDialog();
+        try {
+          await window.aurora?.installUpdate?.();
+        } catch (_) {
+          updateState = { status: 'error' };
+          renderUpdateDialog();
+        }
+      } else if (updateState.status !== 'downloading') {
         updateState = { status: 'checking' };
         renderUpdateDialog();
         const result = await window.aurora?.checkForUpdate?.();
