@@ -21,3 +21,7 @@ html,body{height:100%;overflow:hidden}
 .tuning-apply{margin-top:22px;width:100%}.tuning-status{display:flex;flex-direction:column;align-items:flex-start;gap:10px;margin-top:16px}.tuning-status strong{font-size:13px}.tuning-status p{font-size:12px;margin:0}.tuning-status .badge{margin-bottom:3px}
 
 .update-progress{height:6px;border-radius:4px;background:var(--line);overflow:hidden;margin:-6px 0 18px}.update-progress[hidden]{display:none}.update-progress div{height:100%;width:0;background:var(--accent);transition:width .25s ease}.update-button.has-update{border-color:var(--accent);color:var(--text)}.update-button.has-update .update-dot{background:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 25%,transparent)}
+
+
+/* Nexus emblem refresh for 1.5.2 */
+.brand-icon,.window-app-mark{background:linear-gradient(145deg,#7668e8 0%,#5141b8 100%);color:#fff;box-shadow:0 5px 13px #5141b82e}.brand-icon svg,.window-app-mark svg{display:block;width:70%;height:70%;overflow:visible}.brand-icon svg path:first-child,.window-app-mark svg path:first-child{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round}.brand-icon svg path:last-child,.window-app-mark svg path:last-child{fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}.window-app-mark{width:20px;height:20px;padding:3px;border-radius:6px;font-size:0}.dark .brand-icon,.dark .window-app-mark{background:linear-gradient(145deg,#a99aff 0%,#7565df 100%);color:#171b24;box-shadow:0 5px 15px #8d7cff3b}

@@ -53,7 +53,7 @@
   window.aurora?.onUpdateState?.(state => { updateState = state; renderUpdateDialog(); });
   window.aurora?.getUpdateState?.().then(state => { if (state) { updateState = state; renderUpdateDialog(); } }).catch(() => {});
   const pageTitles = { home: 'Home', mouse: 'Mouse', keyboard: 'Keyboard', controller: 'Controller', devices: 'Devices', tuning: 'Tuning', history: 'Test history', profiles: 'Profiles', settings: 'Settings' };
-  let appVersion = '1.5.1';
+  let appVersion = '1.5.2';
   let updateState = { status: 'idle' };
   window.aurora?.version?.().then(v => { if (v) appVersion = v; }).catch(() => {});
   let audioContext;
