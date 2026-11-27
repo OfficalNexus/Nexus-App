@@ -48,14 +48,36 @@ async function checkForUpdates() {
 
 function scanWindowsDevices() {
   if (process.platform !== 'win32') return Promise.resolve({ devices: [], message: 'Device scanning is available in the Windows build.' });
-  const script = "Get-PnpDevice -PresentOnly | Select-Object Class,FriendlyName,Status,InstanceId,ProblemCode | ConvertTo-Json -Compress";
+  // Keep this read-only query focused on gaming input devices. HIDClass can also
+  // contain unrelated sensors and buttons, so names are checked before inclusion.
+  const script = `$controllerWords = '(?i)(controller|gamepad|dualshock|dualsense|playstation|xbox|joy[- ]?con|steam deck|8bitdo|switch pro)'
+$mouseWords = '(?i)(mouse|touchpad|trackpad)'
+$keyboardWords = '(?i)(keyboard|keypad|typing)'
+Get-PnpDevice -PresentOnly | ForEach-Object {
+  $label = "$($_.FriendlyName) $($_.InstanceId)"
+  $category = $null
+  if ($_.Class -eq 'Mouse' -or $label -match $mouseWords) { $category = 'Mouse' }
+  elseif ($_.Class -eq 'Keyboard' -or $label -match $keyboardWords) { $category = 'Keyboard' }
+  elseif ($label -match $controllerWords) { $category = 'Controller' }
+  if ($category) {
+    [PSCustomObject]@{ Class = $category; FriendlyName = $_.FriendlyName; Status = $_.Status; InstanceId = $_.InstanceId; ProblemCode = $_.ProblemCode }
+  }
+} | Sort-Object Class,FriendlyName,InstanceId | ConvertTo-Json -Compress`;
   return new Promise(resolve => {
     execFile('powershell.exe', ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-Command', script], { windowsHide: true, maxBuffer: 8 * 1024 * 1024 }, (error, stdout) => {
       if (error) return resolve({ devices: [], message: error.message });
       try {
         const parsed = JSON.parse(stdout || '[]');
         const list = Array.isArray(parsed) ? parsed : [parsed];
-        resolve({ devices: list.filter(item => item && item.FriendlyName).map(item => ({ className: item.Class || 'Unknown', name: item.FriendlyName, status: item.Status || 'Unknown', instanceId: item.InstanceId || '', problemCode: item.ProblemCode ?? 0 })) });
+        const seen = new Set();
+        const devices = list.filter(item => {
+          if (!item || !item.FriendlyName) return false;
+          const key = `${item.Class}|${item.FriendlyName}|${item.InstanceId || ''}`;
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        }).map(item => ({ className: item.Class || 'Other', name: item.FriendlyName, status: item.Status || 'Unknown', instanceId: item.InstanceId || '', problemCode: item.ProblemCode ?? 0 }));
+        resolve({ devices, message: devices.length ? '' : 'No supported mouse, keyboard, or controller was found.' });
       } catch (_) { resolve({ devices: [], message: 'Windows returned an unreadable device list.' }); }
     });
   });
