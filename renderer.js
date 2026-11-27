@@ -5,6 +5,13 @@
   const $$ = selector => [...document.querySelectorAll(selector)];
   const defaults = { sound: true, hoverSound: true, clickSound: true, volume: 20, animations: true, dark: false };
   const storageKey = 'nexus-tools-v11';
+  const lastSeenVersionKey = 'nexus-last-seen-version';
+  const builtInChangelog = {
+    '1.5.3': ['Added a What’s new window after updates.', 'Added a toolbar shortcut so release notes can be opened anytime.', 'Improved update messaging with a clear version and change summary.'],
+    '1.5.2': ['Introduced the new geometric Nexus logo in the sidebar and title bar.', 'Added a modern gradient emblem with light and dark theme support.'],
+    '1.5.1': ['Improved the Windows installer update flow.', 'Fixed update packaging so the installer and update metadata are delivered together.'],
+    '1.5.0': ['Added the Electron updater with silent install and restart.', 'Added read-only device scanning and safe tuning target choices.']
+  };
   let stored = {};
   try { stored = JSON.parse(localStorage.getItem(storageKey) || '{}'); } catch (_) { /* Use defaults for invalid data. */ }
   const state = {
@@ -55,7 +62,31 @@
   const pageTitles = { home: 'Home', mouse: 'Mouse', keyboard: 'Keyboard', controller: 'Controller', devices: 'Devices', tuning: 'Tuning', history: 'Test history', profiles: 'Profiles', settings: 'Settings' };
   let appVersion = '1.5.2';
   let updateState = { status: 'idle' };
-  window.aurora?.version?.().then(v => { if (v) appVersion = v; }).catch(() => {});
+  function changelogEntries(version = appVersion, notes = '') {
+    const external = String(notes || '').split(/\n+/).map(item => item.replace(/^[-*•]\s*/, '').trim()).filter(Boolean);
+    return external.length ? external : (builtInChangelog[version] || ['Bug fixes and small improvements for a smoother Nexus experience.']);
+  }
+  function showChangelog(version = appVersion, notes = '') {
+    const dialog = $('#changelog-dialog');
+    if (!dialog) return;
+    $('#changelog-title').textContent = `What’s new in Nexus ${version}`;
+    $('#changelog-intro').textContent = version === appVersion ? 'Here are the latest changes in this version.' : `Changes included in Nexus ${version}.`;
+    $('#changelog-list').innerHTML = changelogEntries(version, notes).map(item => `<div class="changelog-item"><span class="changelog-check">${icon('check')}</span><span>${escape(item)}</span></div>`).join('');
+    if (!dialog.open) dialog.showModal();
+  }
+  function markVersionSeen(version) {
+    try { localStorage.setItem(lastSeenVersionKey, version); } catch (_) { /* Optional convenience only. */ }
+  }
+  window.aurora?.version?.().then(v => {
+    if (!v) return;
+    appVersion = v;
+    const previous = localStorage.getItem(lastSeenVersionKey);
+    const versionLabel = $('.sidebar-version');
+    if (versionLabel) versionLabel.innerHTML = `Nexus ${escape(appVersion)} <span>·</span> Windows`;
+    $('#update-version').textContent = appVersion;
+    if (previous && previous !== appVersion) showChangelog(appVersion);
+    markVersionSeen(appVersion);
+  }).catch(() => {});
   let audioContext;
   let toastTimer;
   let mouseTimer;
@@ -476,6 +507,14 @@
         const result = await window.aurora?.checkForUpdate?.();
         if (result) { updateState = result; renderUpdateDialog(); }
       }
+      return;
+    }
+    if (button.id === 'changelog-button') {
+      showChangelog();
+      return;
+    }
+    if (button.id === 'changelog-close') {
+      $('#changelog-dialog')?.close();
       return;
     }
     if (button.id === 'restart-app') {
