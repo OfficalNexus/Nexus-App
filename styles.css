@@ -39,3 +39,11 @@ html,body{height:100%;overflow:hidden}
 /* Nexus is an app interface, not a document: prevent accidental text selection/copying. */
 html,body,.app,.workspace,.sidebar,.toolbar,main,dialog,button,label,p,h1,h2,h3,span,small,strong,b{user-select:none;-webkit-user-select:none}
 input,select,textarea{user-select:none;-webkit-user-select:none}
+
+/* Bold, polished Nexus typography */
+body,body *{font-family:'Segoe UI Variable','Segoe UI',system-ui,Arial,sans-serif;font-weight:600;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+h1,h2,h3{font-weight:750;letter-spacing:-.35px}
+strong,b{font-weight:750}
+small,.small-copy,.field-hint,.badge,.sidebar-version,.window-title{font-weight:600}
+button,input,select,textarea{font-weight:650}
+::placeholder{font-weight:600;opacity:.78}

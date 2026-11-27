@@ -7,6 +7,7 @@
   const storageKey = 'nexus-tools-v11';
   const lastSeenVersionKey = 'nexus-last-seen-version';
   const builtInChangelog = {
+    '1.7.1': ['Refined Nexus typography with bold, clearer text throughout the interface.', 'Added stronger heading hierarchy and a polished Windows-native font stack.', 'Kept the existing colors, layout, animations, and updater behavior unchanged.'],
     '1.7.0': ['Disabled accidental text selection in the Nexus interface.', 'Double-clicking UI text no longer highlights or copies it.', 'Buttons, controls, sliders, and app interactions continue to work normally.'],
     '1.6.8': ['Made the toolbar update check silent, without opening the old update dialog.', 'Clicking the green update icon now immediately closes Nexus and installs the downloaded update.', 'The refresh icon changes to the install icon only after an update is ready.'],
     '1.6.7': ['Fixed the updater toolbar so the refresh and green install icons are mutually exclusive.', 'The refresh icon is shown only when no update is ready.', 'The green download/install icon is shown only after an update has finished downloading.'],
