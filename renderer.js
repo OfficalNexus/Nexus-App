@@ -7,6 +7,7 @@
   const storageKey = 'nexus-tools-v11';
   const lastSeenVersionKey = 'nexus-last-seen-version';
   const builtInChangelog = {
+    '1.7.2': ['Polished bold typography across navigation, metrics, and window labels.', 'Fixed the Home screen version fallback so it shows the current app version immediately.', 'Kept spacing, colors, animations, and the Discord-style updater unchanged.'],
     '1.7.1': ['Refined Nexus typography with bold, clearer text throughout the interface.', 'Added stronger heading hierarchy and a polished Windows-native font stack.', 'Kept the existing colors, layout, animations, and updater behavior unchanged.'],
     '1.7.0': ['Disabled accidental text selection in the Nexus interface.', 'Double-clicking UI text no longer highlights or copies it.', 'Buttons, controls, sliders, and app interactions continue to work normally.'],
     '1.6.8': ['Made the toolbar update check silent, without opening the old update dialog.', 'Clicking the green update icon now immediately closes Nexus and installs the downloaded update.', 'The refresh icon changes to the install icon only after an update is ready.'],
@@ -86,7 +87,7 @@
   window.aurora?.onUpdateState?.(state => { updateState = state; renderUpdateDialog(); });
   window.aurora?.getUpdateState?.().then(state => { if (state) { updateState = state; renderUpdateDialog(); } }).catch(() => {});
   const pageTitles = { home: 'Home', settings: 'Settings' };
-  let appVersion = '1.6.6';
+  let appVersion = '1.7.2';
   let updateState = { status: 'idle' };
   function changelogEntries(version = appVersion, notes = '') {
     const external = String(notes || '').split(/\n+/).map(item => item.replace(/^[-*•]\s*/, '').trim()).filter(Boolean);

@@ -47,3 +47,7 @@ strong,b{font-weight:750}
 small,.small-copy,.field-hint,.badge,.sidebar-version,.window-title{font-weight:600}
 button,input,select,textarea{font-weight:650}
 ::placeholder{font-weight:600;opacity:.78}
+
+/* Final typography consistency polish */
+.nav-button,.window-title span{font-weight:650}
+.metric b{font-weight:750}
