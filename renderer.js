@@ -7,6 +7,7 @@
   const storageKey = 'nexus-tools-v11';
   const lastSeenVersionKey = 'nexus-last-seen-version';
   const builtInChangelog = {
+    '1.6.2': ['Simplified the sidebar to Home and Settings only.', 'Temporarily removed the old device testing, tuning, history, profiles, and game tabs from the visible interface.', 'Updated Home to focus on the new FPS Game Profile Manager direction.'],
     '1.6.1': ['Improved the Windows release asset publishing so the installer, latest.yml, and blockmap arrive together.', 'Reworked Nexus into an FPS Game Profile Manager.', 'Added backup-first Optimize and Restore actions for verified reversible game profiles.'],
     '1.6.0': ['Reworked Nexus into an FPS Game Profile Manager.', 'Detects installed games from major launchers and Windows game entries.', 'Added backup-first Optimize and Restore actions for verified reversible game profiles.'],
     '1.5.6': ['Added a safe DualShock 4 tuning page with controller detection and live input diagnostics.', 'Added observed sampling-rate and stick-drift readings.', 'Added a saved local dead-zone profile without changing controller hardware.'],
@@ -63,8 +64,8 @@
   }
   window.aurora?.onUpdateState?.(state => { updateState = state; renderUpdateDialog(); });
   window.aurora?.getUpdateState?.().then(state => { if (state) { updateState = state; renderUpdateDialog(); } }).catch(() => {});
-  const pageTitles = { home: 'Home', games: 'My games', mouse: 'Mouse', keyboard: 'Keyboard', controller: 'Controller', devices: 'Devices', tuning: 'Tuning', history: 'Test history', profiles: 'Profiles', settings: 'Settings' };
-  let appVersion = '1.6.1';
+  const pageTitles = { home: 'Home', settings: 'Settings' };
+  let appVersion = '1.6.2';
   let updateState = { status: 'idle' };
   function changelogEntries(version = appVersion, notes = '') {
     const external = String(notes || '').split(/\n+/).map(item => item.replace(/^[-*•]\s*/, '').trim()).filter(Boolean);
@@ -205,13 +206,13 @@
   }
 
   function homePage() {
-    return heading('Your games, optimized simply.', 'Find installed games and apply safe, reversible FPS performance profiles.') +
-      `<section class="welcome"><div><h2>Scan your game libraries</h2><p>Nexus checks Steam, Epic Games, EA, Ubisoft, Battle.net, Riot, GOG, Xbox, and Windows game entries. It lists games only, then gives you one clear Optimize button.</p><button class="button" data-page="games">Open game profiles <span class="nav-icon">${icon('arrow')}</span></button></div><div class="welcome-symbol"><span class="nav-icon">${icon('profiles')}</span></div></section>
-      <div class="section-heading"><h2>Choose a workspace</h2><span>Game profiles first, device tools still available</span></div>
+    return heading('Nexus Game Profile Manager.', 'A focused home screen for safe, reversible FPS optimization.') +
+      `<section class="welcome"><div><h2>Game profiles are coming together</h2><p>Nexus is being rebuilt around one-click game optimization. The old device testing tools are hidden for now while the new profile experience is refined.</p><button class="button" data-page="settings">Open settings <span class="nav-icon">${icon('arrow')}</span></button></div><div class="welcome-symbol"><span class="nav-icon">${icon('profiles')}</span></div></section>
+      <div class="section-heading"><h2>Current focus</h2><span>Safe and simple by design</span></div>
       <section class="tool-grid">
-        <article class="card tool-card"><div class="tool-icon">${icon('profiles')}</div><h3>FPS Game Profiles</h3><p>Detect installed games and apply a verified performance profile with automatic backup and Restore.</p><button class="button secondary" data-page="games">Open game profiles <span class="nav-icon">${icon('arrow')}</span></button></article>
-        <article class="card tool-card"><div class="tool-icon sky">${icon('controller')}</div><h3>Device tools</h3><p>Keep using the existing mouse, keyboard, controller, and DualShock 4 diagnostics.</p><button class="button secondary" data-page="devices">View devices <span class="nav-icon">${icon('arrow')}</span></button></article>
-        <article class="card tool-card"><div class="tool-icon teal">${icon('shield')}</div><h3>Safe by design</h3><p>No game memory editing, DLL injection, cheats, firmware changes, or undocumented random tweaks.</p><button class="button secondary" data-page="settings">Review settings <span class="nav-icon">${icon('arrow')}</span></button></article>
+        <article class="card tool-card"><div class="tool-icon">${icon('profiles')}</div><h3>One-click optimization</h3><p>Select a game and let Nexus apply only a verified, reversible performance profile.</p></article>
+        <article class="card tool-card"><div class="tool-icon sky">${icon('shield')}</div><h3>Backup first</h3><p>Original settings are saved before any supported game configuration is changed.</p></article>
+        <article class="card tool-card"><div class="tool-icon teal">${icon('settings')}</div><h3>Settings</h3><p>Control the Nexus appearance, animations, and sound feedback from the Settings tab.</p><button class="button secondary" data-page="settings">Open settings <span class="nav-icon">${icon('arrow')}</span></button></article>
       </section>
       <div class="section-heading"><h2>Good to know</h2></div>
       ${notice('Nexus changes only verified, reversible game configuration files. Unsupported games remain detection-only until a safe profile is added. There are no simulated games or made-up optimization results.')}
