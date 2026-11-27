@@ -1,6 +1,6 @@
 {
   "name": "nexus-boost",
-  "version": "1.6.5",
+  "version": "1.6.6",
   "description": "Nexus FPS game profile manager",
   "author": "Nexus",
   "repository": "https://github.com/OfficalNexus/Nexus-App",
@@ -26,6 +26,7 @@
       "ui.js",
       "renderer.js",
       "game-profiles.js",
+      "assets/nexus-update-download.png",
       "package.json"
     ],
     "win": {
