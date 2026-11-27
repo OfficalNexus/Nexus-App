@@ -7,6 +7,7 @@
   const storageKey = 'nexus-tools-v11';
   const lastSeenVersionKey = 'nexus-last-seen-version';
   const builtInChangelog = {
+    '1.6.0': ['Reworked Nexus into an FPS Game Profile Manager.', 'Detects installed games from major launchers and Windows game entries.', 'Added backup-first Optimize and Restore actions for verified reversible game profiles.'],
     '1.5.6': ['Added a safe DualShock 4 tuning page with controller detection and live input diagnostics.', 'Added observed sampling-rate and stick-drift readings.', 'Added a saved local dead-zone profile without changing controller hardware.'],
     '1.5.5': ['Changed the Windows desktop and Start Menu icon to the new controller artwork.', 'The supplied controller logo is now used by the installer and application shortcuts.'],
     '1.5.3': ['Added a What’s new window after updates.', 'Added a toolbar shortcut so release notes can be opened anytime.', 'Improved update messaging with a clear version and change summary.'],
@@ -61,7 +62,7 @@
   }
   window.aurora?.onUpdateState?.(state => { updateState = state; renderUpdateDialog(); });
   window.aurora?.getUpdateState?.().then(state => { if (state) { updateState = state; renderUpdateDialog(); } }).catch(() => {});
-  const pageTitles = { home: 'Home', mouse: 'Mouse', keyboard: 'Keyboard', controller: 'Controller', devices: 'Devices', tuning: 'Tuning', history: 'Test history', profiles: 'Profiles', settings: 'Settings' };
+  const pageTitles = { home: 'Home', games: 'My games', mouse: 'Mouse', keyboard: 'Keyboard', controller: 'Controller', devices: 'Devices', tuning: 'Tuning', history: 'Test history', profiles: 'Profiles', settings: 'Settings' };
   let appVersion = '1.5.6';
   let updateState = { status: 'idle' };
   function changelogEntries(version = appVersion, notes = '') {
@@ -114,6 +115,10 @@
   let ds4TuneSamples = 0;
   let ds4LeftDrift = [];
   let ds4RightDrift = [];
+  let games = [];
+  let gameScanBusy = false;
+  let gameScanMessage = '';
+  let gameActionBusy = '';
 
   function save() {
     try {
@@ -199,16 +204,16 @@
   }
 
   function homePage() {
-    return heading('Your devices, made simple.', 'A few useful tools to check how your gaming gear responds.') +
-      `<section class="welcome"><div><h2>Start with a quick check</h2><p>Move your mouse, try your keyboard, or check your controller. No setup, driver tweaks, or administrator access needed.</p><button class="button" data-page="mouse">Test my mouse <span class="nav-icon">${icon('arrow')}</span></button></div><div class="welcome-symbol"><span class="nav-icon">${icon('mouse')}</span></div></section>
-      <div class="section-heading"><h2>Choose a tool</h2><span>Three simple ways to get started</span></div>
+    return heading('Your games, optimized simply.', 'Find installed games and apply safe, reversible FPS performance profiles.') +
+      `<section class="welcome"><div><h2>Scan your game libraries</h2><p>Nexus checks Steam, Epic Games, EA, Ubisoft, Battle.net, Riot, GOG, Xbox, and Windows game entries. It lists games only, then gives you one clear Optimize button.</p><button class="button" data-page="games">Open game profiles <span class="nav-icon">${icon('arrow')}</span></button></div><div class="welcome-symbol"><span class="nav-icon">${icon('profiles')}</span></div></section>
+      <div class="section-heading"><h2>Choose a workspace</h2><span>Game profiles first, device tools still available</span></div>
       <section class="tool-grid">
-        <article class="card tool-card"><div class="tool-icon">${icon('mouse')}</div><h3>Mouse test</h3><p>Check the timing of pointer events while you move your mouse.</p><button class="button secondary" data-page="mouse">Open mouse test <span class="nav-icon">${icon('arrow')}</span></button></article>
-        <article class="card tool-card"><div class="tool-icon sky">${icon('keyboard')}</div><h3>Keyboard test</h3><p>See which keys are pressed and check that they register correctly.</p><button class="button secondary" data-page="keyboard">Open keyboard test <span class="nav-icon">${icon('arrow')}</span></button></article>
-        <article class="card tool-card"><div class="tool-icon teal">${icon('controller')}</div><h3>Controller test</h3><p>Watch your sticks, triggers, and buttons respond in real time.</p><button class="button secondary" data-page="controller">Open controller test <span class="nav-icon">${icon('arrow')}</span></button></article>
+        <article class="card tool-card"><div class="tool-icon">${icon('profiles')}</div><h3>FPS Game Profiles</h3><p>Detect installed games and apply a verified performance profile with automatic backup and Restore.</p><button class="button secondary" data-page="games">Open game profiles <span class="nav-icon">${icon('arrow')}</span></button></article>
+        <article class="card tool-card"><div class="tool-icon sky">${icon('controller')}</div><h3>Device tools</h3><p>Keep using the existing mouse, keyboard, controller, and DualShock 4 diagnostics.</p><button class="button secondary" data-page="devices">View devices <span class="nav-icon">${icon('arrow')}</span></button></article>
+        <article class="card tool-card"><div class="tool-icon teal">${icon('shield')}</div><h3>Safe by design</h3><p>No game memory editing, DLL injection, cheats, firmware changes, or undocumented random tweaks.</p><button class="button secondary" data-page="settings">Review settings <span class="nav-icon">${icon('arrow')}</span></button></article>
       </section>
       <div class="section-heading"><h2>Good to know</h2></div>
-      ${notice('This version is a testing tool, not an overclocking driver. It does not detect USB model details, change polling settings, or modify firmware. There are no simulated results or made-up connected devices.')}
+      ${notice('Nexus changes only verified, reversible game configuration files. Unsupported games remain detection-only until a safe profile is added. There are no simulated games or made-up optimization results.')}
       <section class="split equal"><article class="card"><h3>Your test history</h3><p class="small-copy">${state.history.length ? `${state.history.length} saved mouse test${state.history.length === 1 ? '' : 's'} ready to review.` : 'Your completed mouse tests will appear here.'}</p><button class="button link" style="margin-top:17px" data-page="history">View history ${iconButtonArrow()}</button></article><article class="card"><h3>Make it feel like yours</h3><p class="small-copy">Change the theme, turn sounds off, or keep animations subtle.</p><button class="button link" style="margin-top:17px" data-page="settings">Open settings ${iconButtonArrow()}</button></article></section>`;
   }
 
@@ -256,6 +261,10 @@
       notice('Nexus can inspect a DualShock 4 through the Windows gamepad interface. These tools do not install drivers, change firmware, or overclock the controller hardware. The observed rate is application sampling, not a USB polling measurement.') +
       `<section class="split"><article class="card"><div class="row space-between"><h2>DualShock 4 status</h2><span class="badge neutral" id="ds4-status">Looking for controller</span></div><p id="ds4-device" class="small-copy" style="margin:14px 0 18px">Connect your DualShock 4 by USB or Bluetooth, then keep this page open.</p><div class="metrics"><div class="metric"><small>Observed samples/s</small><b id="ds4-rate">—</b></div><div class="metric"><small>Samples recorded</small><b id="ds4-samples">0</b></div><div class="metric"><small>Left stick drift</small><b id="ds4-left-drift">—</b></div><div class="metric"><small>Right stick drift</small><b id="ds4-right-drift">—</b></div></div><button class="button secondary" id="reset-ds4-test" style="margin-top:20px">Reset live check</button></article><article class="card"><h2>Safe local profile</h2><label class="form-label" for="ds4-deadzone">Stick dead zone</label><div class="range-row"><input type="range" id="ds4-deadzone" min="0" max="30" value="${state.deadzone}"><output id="ds4-deadzone-value">${state.deadzone}%</output></div><p class="small-copy">This only changes how Nexus displays stick input and remembers your preference. It does not change the DualShock 4 or your games.</p><div class="notice" style="margin-top:20px;margin-bottom:0"><span class="nav-icon">${icon('shield')}</span><p>Real polling-rate changes require device-specific driver support. Nexus will not apply an unsafe universal overclock.</p></div></article></section>`;
   }
+  function gamesPage() {
+    const content = gameScanBusy ? '<div class="device-empty">Looking through installed game libraries…</div>' : gameScanMessage && !games.length ? `<div class="device-empty"><strong>No installed games found</strong><p>${escape(gameScanMessage)}</p></div>` : games.length ? games.map(game => `<article class="card game-card"><div class="game-leading">${icon('profiles')}</div><div class="game-details"><div class="row space-between"><h3>${escape(game.name)}</h3><span class="badge ${game.supported ? 'green' : 'neutral'}">${game.supported ? 'Profile available' : 'Detection only'}</span></div><p>${escape(game.launcher)} · ${escape(game.installPath)}</p><small>${escape(game.profileReason)}</small></div><div class="game-actions"><button class="button ${game.supported ? '' : 'secondary'}" data-optimize-game="${escape(game.id)}" ${!game.supported || gameActionBusy ? 'disabled' : ''}>${gameActionBusy === game.id ? 'Optimizing…' : 'Optimize'}</button><button class="button secondary" data-restore-game="${escape(game.id)}" ${gameActionBusy ? 'disabled' : ''}>Restore</button></div></article>`).join('') : '<div class="device-empty"><strong>No scan performed yet</strong><p>Click Scan games to find installed games without listing normal Windows programs.</p></div>';
+    return heading('FPS Game Profiles', 'Find installed games and apply a safe, reversible performance profile with one click.', `<button class="button" id="scan-games" ${gameScanBusy ? 'disabled' : ''}>${gameScanBusy ? 'Scanning…' : 'Scan games'} <span class="nav-icon">${icon('arrow')}</span></button>`) + notice('Nexus reads launcher manifests and Windows game entries. It lists games only, never every executable. Optimize is enabled only when Nexus has a verified profile for that game; a backup is created before every change.') + `<section class="game-list">${content}</section>`;
+  }
   function historyPage() {
     const action = state.history.length ? `<div class="row"><button class="button secondary" id="export-history"><span class="nav-icon">${icon('download')}</span>Export JSON</button><button class="button secondary" id="clear-history">Clear history</button></div>` : '';
     return heading('Test history', 'Review your real pointer-event tests. Saved only on this computer.', action) +
@@ -278,7 +287,7 @@
   }
 
   function render() {
-    const pages = { home: homePage, mouse: mousePage, keyboard: keyboardPage, controller: controllerPage, devices: devicesPage, tuning: tuningPage, history: historyPage, profiles: profilesPage, settings: settingsPage };
+    const pages = { home: homePage, games: gamesPage, mouse: mousePage, keyboard: keyboardPage, controller: controllerPage, devices: devicesPage, tuning: tuningPage, history: historyPage, profiles: profilesPage, settings: settingsPage };
     const page = $('#page');
     page.innerHTML = pages[state.page]();
     page.classList.remove('enter');
@@ -296,6 +305,7 @@
     }
     if (state.page === 'devices' && !deviceScanBusy && !hasScannedDevices) scanDevices();
     if (state.page === 'tuning') { resetDs4Tune(); ds4TuneLoop(); } else cancelAnimationFrame(ds4TuneFrame);
+    if (state.page === 'games' && !gameScanBusy && !games.length && !gameScanMessage) scanGames();
     fillIcons();
   }
 
@@ -316,6 +326,14 @@
       deviceScanBusy = false;
       if (state.page === 'devices') render();
     }
+  }
+
+  async function scanGames() {
+    if (gameScanBusy || !window.aurora?.discoverGames) return;
+    gameScanBusy = true; gameScanMessage = ''; render();
+    try { games = await window.aurora.discoverGames(); gameScanMessage = games.length ? '' : 'No installed game manifests were found.'; }
+    catch (_) { games = []; gameScanMessage = 'The game scan could not be completed.'; }
+    finally { gameScanBusy = false; if (state.page === 'games') render(); }
   }
 
   function syncSoundControls() {
@@ -586,6 +604,21 @@
     if (button.id === 'start-mouse') startMouse();
     if (button.id === 'stop-mouse') stopMouse(false);
     if (button.id === 'scan-devices') { hasScannedDevices = false; scanDevices(); }
+    if (button.id === 'scan-games') { games = []; gameScanMessage = ''; scanGames(); }
+    if (button.dataset.optimizeGame) {
+      const game = games.find(item => item.id === button.dataset.optimizeGame); if (!game) return;
+      gameActionBusy = game.id; render();
+      try { const result = await window.aurora.optimizeGame(game); toast(result?.message || 'Optimization finished.'); if (result?.ok) game.backup = result.backup || true; }
+      catch (_) { toast('Optimization could not be completed.'); }
+      finally { gameActionBusy = ''; render(); }
+    }
+    if (button.dataset.restoreGame) {
+      const game = games.find(item => item.id === button.dataset.restoreGame); if (!game) return;
+      gameActionBusy = game.id; render();
+      try { const result = await window.aurora.restoreGame(game); toast(result?.message || 'Restore finished.'); }
+      catch (_) { toast('Restore could not be completed.'); }
+      finally { gameActionBusy = ''; render(); }
+    }
     if (button.id === 'clear-keys') {
       keyCount = 0; keyLog = []; pressedKeys.clear(); render(); toast('Keyboard test cleared.');
     }

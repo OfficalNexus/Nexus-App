@@ -4,6 +4,7 @@ const fs = require('fs');
 const os = require('os');
 const { execFile } = require('child_process');
 const { autoUpdater } = require('electron-updater');
+const { discoverGames, optimizeGame, restoreGame } = require('./game-profiles');
 
 // ---- Auto-update (electron-updater, GitHub Releases) ----------------------
 // Flow: check -> download in the background -> "Install and restart" -> silent
@@ -92,7 +93,7 @@ function createWindow() {
     height: 860,
     minWidth: 900,
     minHeight: 640,
-    title: 'Nexus — Peripheral tools',
+    title: 'Nexus — FPS Game Profiles',
     backgroundColor: '#f7f8fc',
     autoHideMenuBar: true,
     frame: false,
@@ -140,6 +141,9 @@ app.whenReady().then(() => {
     return true;
   });
   ipcMain.handle('devices:scan', () => scanWindowsDevices());
+  ipcMain.handle('games:discover', () => discoverGames());
+  ipcMain.handle('games:optimize', (_event, game) => optimizeGame(game));
+  ipcMain.handle('games:restore', (_event, game) => restoreGame(game));
   createWindow();
   if (app.isPackaged) {
     setTimeout(checkForUpdates, 4000);

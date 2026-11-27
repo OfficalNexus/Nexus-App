@@ -1,7 +1,7 @@
 {
   "name": "nexus-boost",
-  "version": "1.5.6",
-  "description": "Nexus local peripheral testing tools",
+  "version": "1.6.0",
+  "description": "Nexus FPS game profile manager",
   "author": "Nexus",
   "repository": "https://github.com/OfficalNexus/Nexus-App",
   "main": "main.js",
@@ -25,6 +25,7 @@
       "styles.css",
       "ui.js",
       "renderer.js",
+      "game-profiles.js",
       "package.json"
     ],
     "win": {

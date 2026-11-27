@@ -10,6 +10,9 @@ contextBridge.exposeInMainWorld('aurora', {
     return () => ipcRenderer.removeListener('update:state', listener);
   },
   scanDevices: () => ipcRenderer.invoke('devices:scan'),
+  discoverGames: () => ipcRenderer.invoke('games:discover'),
+  optimizeGame: game => ipcRenderer.invoke('games:optimize', game),
+  restoreGame: game => ipcRenderer.invoke('games:restore', game),
   relaunch: () => ipcRenderer.invoke('app:relaunch'),
   window: {
     minimize: () => ipcRenderer.invoke('window:minimize'),

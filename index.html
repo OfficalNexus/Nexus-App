@@ -4,13 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'">
-  <title>Nexus — Peripheral tools</title>
+  <title>Nexus — FPS Game Profiles</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div class="ambient-scene" aria-hidden="true"><i></i><i></i><i></i><span></span></div>
   <div class="window-chrome">
-    <div class="window-drag-area" id="window-drag-area"><span class="window-app-mark" aria-hidden="true"><svg viewBox="0 0 32 32" focusable="false"><path d="M16 2.7 27.5 9v14L16 29.3 4.5 23V9L16 2.7Z"/><path d="m10 21V11l12 10V11"/></svg></span><span class="window-title">Nexus <span>· Peripheral tools</span></span></div>
+      <div class="window-drag-area" id="window-drag-area"><span class="window-app-mark" aria-hidden="true"><svg viewBox="0 0 32 32" focusable="false"><path d="M16 2.7 27.5 9v14L16 29.3 4.5 23V9L16 2.7Z"/><path d="m10 21V11l12 10V11"/></svg></span><span class="window-title">Nexus <span>· FPS Game Profiles</span></span></div>
     <div class="window-controls" aria-label="Window controls">
       <button id="window-minimize" class="window-control" aria-label="Minimize"><span class="minimize-glyph"></span></button>
       <button id="window-maximize" class="window-control" aria-label="Maximize"><span class="maximize-glyph"></span></button>
@@ -19,10 +19,12 @@
   </div>
   <div class="app">
     <aside class="sidebar" aria-label="Main navigation">
-      <div class="brand"><span class="brand-icon" aria-hidden="true"><svg viewBox="0 0 32 32" focusable="false"><path d="M16 2.7 27.5 9v14L16 29.3 4.5 23V9L16 2.7Z"/><path d="m10 21V11l12 10V11"/></svg></span><div><strong>Nexus</strong><small>Peripheral tools</small></div></div>
+      <div class="brand"><span class="brand-icon" aria-hidden="true"><svg viewBox="0 0 32 32" focusable="false"><path d="M16 2.7 27.5 9v14L16 29.3 4.5 23V9L16 2.7Z"/><path d="m10 21V11l12 10V11"/></svg></span><div><strong>Nexus</strong><small>FPS Game Profiles</small></div></div>
       <nav id="navigation">
         <button data-page="home" class="nav-button active" aria-current="page"><span class="nav-icon" data-icon="home"></span>Home</button>
-        <div class="nav-group">TEST YOUR DEVICES</div>
+        <div class="nav-group">GAME PROFILES</div>
+        <button data-page="games" class="nav-button"><span class="nav-icon" data-icon="profiles"></span>My games</button>
+        <div class="nav-group">DEVICE TOOLS</div>
         <button data-page="mouse" class="nav-button"><span class="nav-icon" data-icon="mouse"></span>Mouse</button>
         <button data-page="keyboard" class="nav-button"><span class="nav-icon" data-icon="keyboard"></span>Keyboard</button>
         <button data-page="controller" class="nav-button"><span class="nav-icon" data-icon="controller"></span>Controller</button>
@@ -33,7 +35,7 @@
         <button data-page="profiles" class="nav-button"><span class="nav-icon" data-icon="profiles"></span>Profiles</button>
         <button data-page="settings" class="nav-button"><span class="nav-icon" data-icon="settings"></span>Settings</button>
       </nav>
-      <div class="sidebar-note"><span class="nav-icon" data-icon="shield"></span><strong>No hardware changes</strong><p>Your device firmware and drivers stay untouched.</p></div>
+      <div class="sidebar-note"><span class="nav-icon" data-icon="shield"></span><strong>Safe and reversible</strong><p>Game settings are backed up before Nexus changes them.</p></div>
       <div class="sidebar-version">Nexus 1.5.6 <span>·</span> Windows</div>
     </aside>
     <div class="workspace">
