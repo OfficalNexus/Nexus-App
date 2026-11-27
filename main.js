@@ -33,9 +33,9 @@ function setUpdateState(next) {
 autoUpdater.on('checking-for-update', () => {
   if (updateState.status !== 'downloading' && updateState.status !== 'ready') setUpdateState({ status: 'checking' });
 });
-autoUpdater.on('update-available', info => setUpdateState({ status: 'downloading', version: info.version, notes: normalizeNotes(info.releaseNotes), percent: 0 }));
-autoUpdater.on('download-progress', progress => setUpdateState({ ...updateState, status: 'downloading', percent: Math.round(progress.percent || 0) }));
-autoUpdater.on('update-downloaded', info => setUpdateState({ status: 'ready', version: info.version, notes: normalizeNotes(info.releaseNotes) }));
+autoUpdater.on('update-available', info => setUpdateState({ status: 'downloading', version: info.version, notes: normalizeNotes(info.releaseNotes), percent: 0, transferred: 0, total: 0, bytesPerSecond: 0 }));
+autoUpdater.on('download-progress', progress => setUpdateState({ ...updateState, status: 'downloading', percent: Math.round(progress.percent || 0), transferred: progress.transferred || 0, total: progress.total || 0, bytesPerSecond: progress.bytesPerSecond || 0 }));
+autoUpdater.on('update-downloaded', info => setUpdateState({ status: 'ready', version: info.version, notes: normalizeNotes(info.releaseNotes), transferred: updateState.total || 0, total: updateState.total || 0, verified: true }));
 autoUpdater.on('update-not-available', () => setUpdateState({ status: 'none' }));
 autoUpdater.on('error', error => setUpdateState({ status: 'error', message: error && error.message ? error.message : 'Update failed' }));
 

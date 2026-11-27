@@ -7,6 +7,7 @@
   const storageKey = 'nexus-tools-v11';
   const lastSeenVersionKey = 'nexus-last-seen-version';
   const builtInChangelog = {
+    '1.6.3': ['Added an NVIDIA-style update panel with live percentage, downloaded size, speed, and remaining time.', 'Added verified-ready, preparing-installation, and retry states.', 'Kept the existing silent per-user installer and GitHub updater backend unchanged.'],
     '1.6.2': ['Simplified the sidebar to Home and Settings only.', 'Temporarily removed the old device testing, tuning, history, profiles, and game tabs from the visible interface.', 'Updated Home to focus on the new FPS Game Profile Manager direction.'],
     '1.6.1': ['Improved the Windows release asset publishing so the installer, latest.yml, and blockmap arrive together.', 'Reworked Nexus into an FPS Game Profile Manager.', 'Added backup-first Optimize and Restore actions for verified reversible game profiles.'],
     '1.6.0': ['Reworked Nexus into an FPS Game Profile Manager.', 'Detects installed games from major launchers and Windows game entries.', 'Added backup-first Optimize and Restore actions for verified reversible game profiles.'],
@@ -34,38 +35,46 @@
     if (!dialog) return;
     const s = updateState || { status: 'idle' };
     const title = $('#update-title'), message = $('#update-message');
-    const bar = $('#update-progress'), barFill = bar?.firstElementChild, button = $('#restart-app');
+    const bar = $('#update-progress'), barFill = bar?.firstElementChild, button = $('#restart-app'), retry = $('#retry-update');
+    const details = $('#update-details');
+    const formatBytes = value => { const n = Number(value) || 0; if (n < 1024) return `${n} B`; const units = ['KB', 'MB', 'GB']; let size = n; let unit = -1; do { size /= 1024; unit += 1; } while (size >= 1024 && unit < units.length - 1); return `${size.toFixed(size >= 100 ? 0 : size >= 10 ? 1 : 2)} ${units[unit]}`; };
+    const formatSpeed = value => `${formatBytes(value)}/s`;
+    const formatEta = (transferred, total, speed) => { const remaining = total > transferred && speed > 0 ? Math.ceil((total - transferred) / speed) : 0; if (!remaining) return 'Calculating…'; const minutes = Math.floor(remaining / 60); return minutes ? `${minutes}m ${remaining % 60}s left` : `${remaining}s left`; };
     $('#update-version').textContent = appVersion;
     bar.hidden = true;
+    if (details) details.hidden = true;
     button.hidden = true;
     button.disabled = false;
     button.textContent = 'Install and restart';
+    if (retry) { retry.hidden = true; retry.disabled = false; retry.textContent = 'Try again'; }
     if (s.status === 'checking') { title.textContent = 'Checking for updates…'; message.textContent = 'Connecting to the Nexus update feed.'; }
     else if (s.status === 'downloading') {
       title.textContent = `Downloading Nexus ${s.version || ''}…`.replace(' …', '…');
-      message.textContent = `${s.percent || 0}% downloaded. You can keep using Nexus.`;
+      message.textContent = 'You can keep using Nexus while the update downloads.';
       bar.hidden = false; barFill.style.width = `${s.percent || 0}%`;
+      if (details) { details.hidden = false; $('#update-percent').textContent = `${s.percent || 0}%`; $('#update-transferred').textContent = s.total ? `${formatBytes(s.transferred)} / ${formatBytes(s.total)}` : formatBytes(s.transferred); $('#update-speed').textContent = s.bytesPerSecond ? formatSpeed(s.bytesPerSecond) : 'Starting…'; $('#update-eta').textContent = formatEta(s.transferred, s.total, s.bytesPerSecond); }
     }
     else if (s.status === 'ready') {
-      title.textContent = `Nexus ${s.version} is ready`;
-      message.textContent = s.notes || 'The update has been downloaded. Restart Nexus to finish installing it.';
+      title.textContent = `Nexus ${s.version} is ready to install`;
+      message.textContent = s.notes || 'Download verified. Restart Nexus to finish installing the update.';
       button.hidden = false;
     }
+    else if (s.status === 'installing') { title.textContent = 'Preparing installation…'; message.textContent = 'Nexus is closing safely and installing the verified update.'; button.hidden = false; button.disabled = true; button.textContent = 'Installing…'; }
     else if (s.status === 'none') { title.textContent = 'You’re up to date'; message.textContent = 'Nexus is running the latest version.'; }
     else if (s.status === 'dev') { title.textContent = 'Updates run in the installed app'; message.textContent = 'This is a development build, so update checks are turned off.'; }
-    else if (s.status === 'error') { title.textContent = 'Update check unavailable'; message.textContent = 'The update feed could not be reached. You can try again later.'; }
+    else if (s.status === 'error') { title.textContent = 'Update check unavailable'; message.textContent = 'The update feed could not be reached. You can try again.'; if (retry) retry.hidden = false; }
     else { title.textContent = 'Check for updates'; message.textContent = 'Nexus will check the official update feed.'; }
     const toolbarButton = $('#update-button');
     if (toolbarButton) {
       toolbarButton.classList.toggle('has-update', s.status === 'ready');
       const label = toolbarButton.querySelector('span:last-child');
-      if (label) label.textContent = s.status === 'ready' ? 'Update ready' : s.status === 'downloading' ? 'Downloading update…' : 'Check for updates';
+      if (label) label.textContent = s.status === 'ready' ? 'Update ready' : s.status === 'downloading' ? `${s.percent || 0}% downloading` : 'Check for updates';
     }
   }
   window.aurora?.onUpdateState?.(state => { updateState = state; renderUpdateDialog(); });
   window.aurora?.getUpdateState?.().then(state => { if (state) { updateState = state; renderUpdateDialog(); } }).catch(() => {});
   const pageTitles = { home: 'Home', settings: 'Settings' };
-  let appVersion = '1.6.2';
+  let appVersion = '1.6.3';
   let updateState = { status: 'idle' };
   function changelogEntries(version = appVersion, notes = '') {
     const external = String(notes || '').split(/\n+/).map(item => item.replace(/^[-*•]\s*/, '').trim()).filter(Boolean);
@@ -594,10 +603,17 @@
     if (button.id === 'restart-app') {
       if (updateState.status !== 'ready') return;
       button.disabled = true;
-      button.textContent = 'Restarting…';
+      updateState = { ...updateState, status: 'installing' };
+      renderUpdateDialog();
       let started = false;
       try { started = await window.aurora?.installUpdate?.(); } catch (_) {}
-      if (!started) { button.disabled = false; button.textContent = 'Install and restart'; toast('The update could not be installed. Try again.'); }
+      if (!started) { updateState = { ...updateState, status: 'error' }; renderUpdateDialog(); toast('The update could not be installed. Try again.'); }
+      return;
+    }
+    if (button.id === 'retry-update') {
+      updateState = { status: 'checking' }; renderUpdateDialog();
+      const result = await window.aurora?.checkForUpdate?.();
+      if (result) { updateState = result; renderUpdateDialog(); }
       return;
     }
     if (button.id === 'update-later') { $('#update-dialog').close(); return; }
