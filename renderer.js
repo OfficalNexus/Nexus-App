@@ -7,6 +7,7 @@
   const storageKey = 'nexus-tools-v11';
   const lastSeenVersionKey = 'nexus-last-seen-version';
   const builtInChangelog = {
+    '1.6.1': ['Improved the Windows release asset publishing so the installer, latest.yml, and blockmap arrive together.', 'Reworked Nexus into an FPS Game Profile Manager.', 'Added backup-first Optimize and Restore actions for verified reversible game profiles.'],
     '1.6.0': ['Reworked Nexus into an FPS Game Profile Manager.', 'Detects installed games from major launchers and Windows game entries.', 'Added backup-first Optimize and Restore actions for verified reversible game profiles.'],
     '1.5.6': ['Added a safe DualShock 4 tuning page with controller detection and live input diagnostics.', 'Added observed sampling-rate and stick-drift readings.', 'Added a saved local dead-zone profile without changing controller hardware.'],
     '1.5.5': ['Changed the Windows desktop and Start Menu icon to the new controller artwork.', 'The supplied controller logo is now used by the installer and application shortcuts.'],
@@ -63,7 +64,7 @@
   window.aurora?.onUpdateState?.(state => { updateState = state; renderUpdateDialog(); });
   window.aurora?.getUpdateState?.().then(state => { if (state) { updateState = state; renderUpdateDialog(); } }).catch(() => {});
   const pageTitles = { home: 'Home', games: 'My games', mouse: 'Mouse', keyboard: 'Keyboard', controller: 'Controller', devices: 'Devices', tuning: 'Tuning', history: 'Test history', profiles: 'Profiles', settings: 'Settings' };
-  let appVersion = '1.5.6';
+  let appVersion = '1.6.1';
   let updateState = { status: 'idle' };
   function changelogEntries(version = appVersion, notes = '') {
     const external = String(notes || '').split(/\n+/).map(item => item.replace(/^[-*•]\s*/, '').trim()).filter(Boolean);

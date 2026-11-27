@@ -35,8 +35,39 @@ jobs:
       - run: npm ci
       - run: node --check main.js && node --check renderer.js && node --check preload.js
 
-      - name: Build and publish installer
-        run: npm run release
+      - name: Build installer
+        run: npm run package:installer
+      - name: Create updater manifest
+        shell: bash
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+          const crypto = require('crypto');
+          const v = require('./package.json').version;
+          const file = `release-v140-installer/Nexus-Setup-${v}.exe`;
+          const data = fs.readFileSync(file);
+          const sha512 = crypto.createHash('sha512').update(data).digest('base64');
+          fs.writeFileSync('release-v140-installer/latest.yml', [
+            `version: ${v}`,
+            'files:',
+            `  - url: Nexus-Setup-${v}.exe`,
+            `    sha512: ${sha512}`,
+            `    size: ${data.length}`,
+            `path: Nexus-Setup-${v}.exe`,
+            `sha512: ${sha512}`,
+            `releaseDate: ${new Date().toISOString()}`,
+            ''
+          ].join('\n'));
+          NODE
+      - name: Create or update GitHub release assets
+        shell: bash
+        run: |
+          v=$(node -p "require('./package.json').version")
+          gh release create "v$v" --repo "$GITHUB_REPOSITORY" --title "Nexus $v" --notes "Nexus $v FPS Game Profile Manager" || true
+          gh release upload "v$v" --repo "$GITHUB_REPOSITORY" \
+            "release-v140-installer/Nexus-Setup-$v.exe" \
+            "release-v140-installer/Nexus-Setup-$v.exe.blockmap" \
+            "release-v140-installer/latest.yml" --clobber
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
