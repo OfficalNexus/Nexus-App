@@ -7,6 +7,7 @@
   const storageKey = 'nexus-tools-v11';
   const lastSeenVersionKey = 'nexus-last-seen-version';
   const builtInChangelog = {
+    '1.6.7': ['Fixed the updater toolbar so the refresh and green install icons are mutually exclusive.', 'The refresh icon is shown only when no update is ready.', 'The green download/install icon is shown only after an update has finished downloading.'],
     '1.6.6': ['Changed the toolbar updater to an icon-only control.', 'The refresh icon checks for updates when no update is available.', 'The supplied green download icon appears when an update is ready to install.'],
     '1.6.5': ['Updated the toolbar updater to show Check for updates when no update is available.', 'Added a download/install icon and Install update label when a downloaded update is ready.', 'Kept the detailed progress and install dialog available when the updater is opened.'],
     '1.6.4': ['Removed the Current focus section from Home.', 'Moved What’s new lower onto the Home page in a dedicated release-notes card.', 'Kept the full changelog available from the new Home-page card.'],
