@@ -7,6 +7,7 @@
   const storageKey = 'nexus-tools-v11';
   const lastSeenVersionKey = 'nexus-last-seen-version';
   const builtInChangelog = {
+    '1.6.4': ['Removed the Current focus section from Home.', 'Moved What’s new lower onto the Home page in a dedicated release-notes card.', 'Kept the full changelog available from the new Home-page card.'],
     '1.6.3': ['Added an NVIDIA-style update panel with live percentage, downloaded size, speed, and remaining time.', 'Added verified-ready, preparing-installation, and retry states.', 'Kept the existing silent per-user installer and GitHub updater backend unchanged.'],
     '1.6.2': ['Simplified the sidebar to Home and Settings only.', 'Temporarily removed the old device testing, tuning, history, profiles, and game tabs from the visible interface.', 'Updated Home to focus on the new FPS Game Profile Manager direction.'],
     '1.6.1': ['Improved the Windows release asset publishing so the installer, latest.yml, and blockmap arrive together.', 'Reworked Nexus into an FPS Game Profile Manager.', 'Added backup-first Optimize and Restore actions for verified reversible game profiles.'],
@@ -74,7 +75,7 @@
   window.aurora?.onUpdateState?.(state => { updateState = state; renderUpdateDialog(); });
   window.aurora?.getUpdateState?.().then(state => { if (state) { updateState = state; renderUpdateDialog(); } }).catch(() => {});
   const pageTitles = { home: 'Home', settings: 'Settings' };
-  let appVersion = '1.6.3';
+  let appVersion = '1.6.4';
   let updateState = { status: 'idle' };
   function changelogEntries(version = appVersion, notes = '') {
     const external = String(notes || '').split(/\n+/).map(item => item.replace(/^[-*•]\s*/, '').trim()).filter(Boolean);
@@ -217,15 +218,8 @@
   function homePage() {
     return heading('Nexus Game Profile Manager.', 'A focused home screen for safe, reversible FPS optimization.') +
       `<section class="welcome"><div><h2>Game profiles are coming together</h2><p>Nexus is being rebuilt around one-click game optimization. The old device testing tools are hidden for now while the new profile experience is refined.</p><button class="button" data-page="settings">Open settings <span class="nav-icon">${icon('arrow')}</span></button></div><div class="welcome-symbol"><span class="nav-icon">${icon('profiles')}</span></div></section>
-      <div class="section-heading"><h2>Current focus</h2><span>Safe and simple by design</span></div>
-      <section class="tool-grid">
-        <article class="card tool-card"><div class="tool-icon">${icon('profiles')}</div><h3>One-click optimization</h3><p>Select a game and let Nexus apply only a verified, reversible performance profile.</p></article>
-        <article class="card tool-card"><div class="tool-icon sky">${icon('shield')}</div><h3>Backup first</h3><p>Original settings are saved before any supported game configuration is changed.</p></article>
-        <article class="card tool-card"><div class="tool-icon teal">${icon('settings')}</div><h3>Settings</h3><p>Control the Nexus appearance, animations, and sound feedback from the Settings tab.</p><button class="button secondary" data-page="settings">Open settings <span class="nav-icon">${icon('arrow')}</span></button></article>
-      </section>
-      <div class="section-heading"><h2>Good to know</h2></div>
       ${notice('Nexus changes only verified, reversible game configuration files. Unsupported games remain detection-only until a safe profile is added. There are no simulated games or made-up optimization results.')}
-      <section class="split equal"><article class="card"><h3>Your test history</h3><p class="small-copy">${state.history.length ? `${state.history.length} saved mouse test${state.history.length === 1 ? '' : 's'} ready to review.` : 'Your completed mouse tests will appear here.'}</p><button class="button link" style="margin-top:17px" data-page="history">View history ${iconButtonArrow()}</button></article><article class="card"><h3>Make it feel like yours</h3><p class="small-copy">Change the theme, turn sounds off, or keep animations subtle.</p><button class="button link" style="margin-top:17px" data-page="settings">Open settings ${iconButtonArrow()}</button></article></section>`;
+      <section class="card whats-new-home"><div class="row space-between"><div><h2>What’s new</h2><p class="small-copy">The latest changes in Nexus.</p></div><span class="badge purple">Nexus ${escape(appVersion)}</span></div><div class="whats-new-list">${changelogEntries(appVersion).slice(0, 3).map(item => `<div class="whats-new-item"><span class="changelog-check">${icon('check')}</span><span>${escape(item)}</span></div>`).join('')}</div><button class="button secondary" id="home-changelog">View full changelog <span class="nav-icon">${icon('arrow')}</span></button></section>`;
   }
 
   function iconButtonArrow() { return `<span class="nav-icon">${icon('arrow')}</span>`; }
@@ -592,7 +586,7 @@
       return;
     }
     if (button.id === 'reset-ds4-test') { resetDs4Tune(); toast('DualShock 4 live check reset.'); return; }
-    if (button.id === 'changelog-button') {
+    if (button.id === 'changelog-button' || button.id === 'home-changelog') {
       showChangelog();
       return;
     }
