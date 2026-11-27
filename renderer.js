@@ -7,6 +7,7 @@
   const storageKey = 'nexus-tools-v11';
   const lastSeenVersionKey = 'nexus-last-seen-version';
   const builtInChangelog = {
+    '1.5.6': ['Added a safe DualShock 4 tuning page with controller detection and live input diagnostics.', 'Added observed sampling-rate and stick-drift readings.', 'Added a saved local dead-zone profile without changing controller hardware.'],
     '1.5.5': ['Changed the Windows desktop and Start Menu icon to the new controller artwork.', 'The supplied controller logo is now used by the installer and application shortcuts.'],
     '1.5.3': ['Added a What’s new window after updates.', 'Added a toolbar shortcut so release notes can be opened anytime.', 'Improved update messaging with a clear version and change summary.'],
     '1.5.2': ['Introduced the new geometric Nexus logo in the sidebar and title bar.', 'Added a modern gradient emblem with light and dark theme support.'],
@@ -61,7 +62,7 @@
   window.aurora?.onUpdateState?.(state => { updateState = state; renderUpdateDialog(); });
   window.aurora?.getUpdateState?.().then(state => { if (state) { updateState = state; renderUpdateDialog(); } }).catch(() => {});
   const pageTitles = { home: 'Home', mouse: 'Mouse', keyboard: 'Keyboard', controller: 'Controller', devices: 'Devices', tuning: 'Tuning', history: 'Test history', profiles: 'Profiles', settings: 'Settings' };
-  let appVersion = '1.5.5';
+  let appVersion = '1.5.6';
   let updateState = { status: 'idle' };
   function changelogEntries(version = appVersion, notes = '') {
     const external = String(notes || '').split(/\n+/).map(item => item.replace(/^[-*•]\s*/, '').trim()).filter(Boolean);
@@ -108,6 +109,11 @@
   let deviceScanMessage = '';
   let deviceScanBusy = false;
   let hasScannedDevices = false;
+  let ds4TuneFrame;
+  let ds4TuneStarted = 0;
+  let ds4TuneSamples = 0;
+  let ds4LeftDrift = [];
+  let ds4RightDrift = [];
 
   function save() {
     try {
@@ -246,12 +252,10 @@
   }
 
   function tuningPage() {
-    const choices = scannedDevices.filter(device => device.name).map(device => `<option value="${escape(device.instanceId)}" ${state.tuningDevice === device.instanceId ? 'selected' : ''}>${escape(device.name)}</option>`).join('');
-    return heading('Tuning', 'Choose a target polling rate for a future supported-device integration.') +
-      notice('These controls currently save a preference only. No driver, firmware, USB descriptor, polling interval, or hardware setting is changed. Applying an unsupported value could make a device unstable, so Nexus will only enable it after a verified vendor-specific implementation exists.') +
-      `<section class="split"><article class="card"><h2>Target settings</h2><label class="form-label" for="tuning-device">Device</label><select id="tuning-device" style="width:100%"><option value="">Select a scanned device</option>${choices}</select><label class="form-label" for="tuning-rate">Target polling rate</label><select id="tuning-rate" style="width:100%"><option value="300" ${state.tuningRate === 300 ? 'selected' : ''}>300 Hz</option><option value="500" ${state.tuningRate === 500 ? 'selected' : ''}>500 Hz</option><option value="1000" ${state.tuningRate === 1000 ? 'selected' : ''}>1000 Hz</option></select><button class="button tuning-apply" id="apply-tuning" disabled title="No supported device integration is installed yet">Apply target (not available yet)</button><p class="field-hint">Your selected target is remembered on this computer. It is not applied to the device.</p></article><article class="card"><h2>Compatibility status</h2><div class="tuning-status"><span class="badge neutral">Read-only planning</span><strong>No supported tuning adapter connected</strong><p>Nexus can identify Windows devices, but it cannot safely change every mouse, keyboard, or controller. Real support must be added one vendor/model family at a time using documented vendor APIs or protocols.</p></div><ul class="helper-list"><li>300 Hz is not universally supported.</li><li>500 Hz and 1000 Hz also depend on the device.</li><li>Unknown devices stay read-only.</li><li>Use the manufacturer utility when it is the supported option.</li></ul></article></section>`;
+    return heading('DualShock 4 tuning', 'Safe controller diagnostics and local profile settings.') +
+      notice('Nexus can inspect a DualShock 4 through the Windows gamepad interface. These tools do not install drivers, change firmware, or overclock the controller hardware. The observed rate is application sampling, not a USB polling measurement.') +
+      `<section class="split"><article class="card"><div class="row space-between"><h2>DualShock 4 status</h2><span class="badge neutral" id="ds4-status">Looking for controller</span></div><p id="ds4-device" class="small-copy" style="margin:14px 0 18px">Connect your DualShock 4 by USB or Bluetooth, then keep this page open.</p><div class="metrics"><div class="metric"><small>Observed samples/s</small><b id="ds4-rate">—</b></div><div class="metric"><small>Samples recorded</small><b id="ds4-samples">0</b></div><div class="metric"><small>Left stick drift</small><b id="ds4-left-drift">—</b></div><div class="metric"><small>Right stick drift</small><b id="ds4-right-drift">—</b></div></div><button class="button secondary" id="reset-ds4-test" style="margin-top:20px">Reset live check</button></article><article class="card"><h2>Safe local profile</h2><label class="form-label" for="ds4-deadzone">Stick dead zone</label><div class="range-row"><input type="range" id="ds4-deadzone" min="0" max="30" value="${state.deadzone}"><output id="ds4-deadzone-value">${state.deadzone}%</output></div><p class="small-copy">This only changes how Nexus displays stick input and remembers your preference. It does not change the DualShock 4 or your games.</p><div class="notice" style="margin-top:20px;margin-bottom:0"><span class="nav-icon">${icon('shield')}</span><p>Real polling-rate changes require device-specific driver support. Nexus will not apply an unsafe universal overclock.</p></div></article></section>`;
   }
-
   function historyPage() {
     const action = state.history.length ? `<div class="row"><button class="button secondary" id="export-history"><span class="nav-icon">${icon('download')}</span>Export JSON</button><button class="button secondary" id="clear-history">Clear history</button></div>` : '';
     return heading('Test history', 'Review your real pointer-event tests. Saved only on this computer.', action) +
@@ -291,6 +295,7 @@
       }
     }
     if (state.page === 'devices' && !deviceScanBusy && !hasScannedDevices) scanDevices();
+    if (state.page === 'tuning') { resetDs4Tune(); ds4TuneLoop(); } else cancelAnimationFrame(ds4TuneFrame);
     fillIcons();
   }
 
@@ -479,6 +484,52 @@
     controllerFrame = requestAnimationFrame(controllerLoop);
   }
 
+  function isDualShock4Pad(pad) {
+    const id = String(pad?.id || '').toLowerCase();
+    return /dualshock|wireless controller|sony.*controller|054c[- ]?(05c4|09cc)/.test(id);
+  }
+  function resetDs4Tune() {
+    ds4TuneStarted = performance.now();
+    ds4TuneSamples = 0;
+    ds4LeftDrift = [];
+    ds4RightDrift = [];
+  }
+  function ds4TuneLoop() {
+    cancelAnimationFrame(ds4TuneFrame);
+    if (state.page !== 'tuning') return;
+    const pads = gamepads().filter(isDualShock4Pad);
+    const status = $('#ds4-status');
+    if (!status) return;
+    if (!pads.length) {
+      status.textContent = 'Not detected';
+      status.className = 'badge neutral';
+      $('#ds4-device').textContent = 'Connect your DualShock 4 by USB or Bluetooth, then keep this page open.';
+      $('#ds4-rate').textContent = '—';
+      $('#ds4-samples').textContent = '0';
+      $('#ds4-left-drift').textContent = '—';
+      $('#ds4-right-drift').textContent = '—';
+      ds4TuneFrame = requestAnimationFrame(ds4TuneLoop);
+      return;
+    }
+    const pad = pads[0];
+    if (!ds4TuneStarted) resetDs4Tune();
+    ds4TuneSamples += 1;
+    const left = Math.hypot(pad.axes?.[0] || 0, pad.axes?.[1] || 0);
+    const right = Math.hypot(pad.axes?.[2] || 0, pad.axes?.[3] || 0);
+    ds4LeftDrift.push(left); ds4RightDrift.push(right);
+    if (ds4LeftDrift.length > 360) ds4LeftDrift.shift();
+    if (ds4RightDrift.length > 360) ds4RightDrift.shift();
+    const elapsed = Math.max(.001, (performance.now() - ds4TuneStarted) / 1000);
+    status.textContent = 'Connected';
+    status.className = 'badge green';
+    $('#ds4-device').textContent = `${pad.id || 'DualShock 4'} · Windows gamepad interface`;
+    $('#ds4-rate').textContent = (ds4TuneSamples / elapsed).toFixed(1);
+    $('#ds4-samples').textContent = String(ds4TuneSamples);
+    $('#ds4-left-drift').textContent = `${(ds4LeftDrift.reduce((a,b)=>a+b,0)/ds4LeftDrift.length*100).toFixed(1)}%`;
+    $('#ds4-right-drift').textContent = `${(ds4RightDrift.reduce((a,b)=>a+b,0)/ds4RightDrift.length*100).toFixed(1)}%`;
+    ds4TuneFrame = requestAnimationFrame(ds4TuneLoop);
+  }
+
   async function confirmClear(title, description) {
     const dialog = $('#confirmation');
     $('#confirm-title').textContent = title;
@@ -511,6 +562,7 @@
       }
       return;
     }
+    if (button.id === 'reset-ds4-test') { resetDs4Tune(); toast('DualShock 4 live check reset.'); return; }
     if (button.id === 'changelog-button') {
       showChangelog();
       return;
@@ -605,6 +657,7 @@
     if (id === 'controller-select') { selectedController = Number(element.value); controllerId = ''; }
     if (id === 'tuning-device') { state.tuningDevice = element.value; save(); }
     if (id === 'tuning-rate') { state.tuningRate = Number(element.value); save(); }
+    if (id === 'ds4-deadzone') { state.deadzone = Number(element.value); $('#ds4-deadzone-value').textContent = `${state.deadzone}%`; save(); }
   });
 
   document.addEventListener('input', event => {
